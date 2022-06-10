@@ -4,6 +4,11 @@
 #include <Wire.h>
 int relay = 4;
 int duration = 2000;
+
+//EDIT 2 LINES BELOW ONLY
+int Pmax = 110000;
+int Pmin = 104000;
+
 #include <LiquidCrystal_I2C.h>
 #include <BMP180.h>
 LiquidCrystal_I2C lcd(0x27, 20, 4); // set the LCD address to 0x27 for a 16 chars and 2 line display
@@ -39,7 +44,7 @@ void loop()
   lcd.backlight();
   lcd.setCursor(0, 0); lcd.print("Pressure: "); lcd.print(myBMP.getPressure());
   lcd.setCursor(0, 1); lcd.print("Relay: OFF");
-  if (myBMP.getPressure() < 110000) {
+  if (myBMP.getPressure() < Pmax) {
     digitalWrite(relay, LOW);
     Serial.println(myBMP.getPressure());
   } else {
@@ -49,7 +54,7 @@ void loop()
       Serial.println(myBMP.getPressure());
       lcd.setCursor(0, 0); lcd.print("Pressure: "); lcd.print(myBMP.getPressure());
       lcd.setCursor(0, 1); lcd.print("Relay: ON ");
-      if (myBMP.getPressure()  < 105000) {
+      if (myBMP.getPressure()  < Pmin) {
         digitalWrite(relay, LOW);
         break;
       }
