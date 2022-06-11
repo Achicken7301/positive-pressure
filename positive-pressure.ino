@@ -3,19 +3,18 @@
 //Library version:1.1
 #include <Wire.h>
 int relay = 4;
-int duration = 2000;
+int duration = 10000;
 
-//EDIT 2 LINES BELOW ONLY
-int Pmax = 110000;
-int Pmin = 104000;
 
 #include <LiquidCrystal_I2C.h>
 #include <BMP180.h>
 LiquidCrystal_I2C lcd(0x27, 20, 4); // set the LCD address to 0x27 for a 16 chars and 2 line display
 BMP180 myBMP(BMP180_ULTRAHIGHRES);
+bool relayIsTrig = false;
 void setup()
 {
   pinMode(relay, OUTPUT);
+//  pinMode(relay, INPUT);
   Serial.begin(9600);
 
   while (myBMP.begin() != true)
@@ -27,7 +26,7 @@ void setup()
   Serial.println(F("Bosch BMP180/BMP085 sensor is OK")); //(F()) saves string to flash & keeps dynamic memory free
 
   lcd.init();                      // initialize the lcd
-  lcd.init();
+  //  lcd.init();
   // Print a message to the LCD.
   //  lcd.backlight();
   //  lcd.setCursor(0, 0);
@@ -39,25 +38,24 @@ void setup()
 
 void loop()
 {
-  lcd.backlight();
-  //  Serial.print(F("Pressure: ")); Serial.print(myBMP.getPressure());Serial.println(F(" +-100Pa"));
-  lcd.backlight();
-  lcd.setCursor(0, 0); lcd.print("Pressure: "); lcd.print(myBMP.getPressure());
-  lcd.setCursor(0, 1); lcd.print("Relay: OFF");
-  if (myBMP.getPressure() < Pmax) {
-    digitalWrite(relay, LOW);
+  if (myBMP.getPressure() < 103000) {
+    lcd.backlight();
+    lcd.setCursor(0, 0); lcd.print("P: ");lcd.print(myBMP.getPressure()); lcd.print(" Pa");
+    lcd.setCursor(0, 1); lcd.print("Relay OFF   ");
     Serial.println(myBMP.getPressure());
-  } else {
     digitalWrite(relay, HIGH);
-    for (int i = 0 ; i < duration; i++) {
-      delay(1);
-      Serial.println(myBMP.getPressure());
-      lcd.setCursor(0, 0); lcd.print("Pressure: "); lcd.print(myBMP.getPressure());
-      lcd.setCursor(0, 1); lcd.print("Relay: ON ");
-      if (myBMP.getPressure()  < Pmin) {
-        digitalWrite(relay, LOW);
-        break;
-      }
-    }
+  } else if (myBMP.getPressure() > 103000 && myBMP.getPressure() < 111000) {
+    lcd.backlight();
+    lcd.setCursor(0, 0); lcd.print("P: ");lcd.print(myBMP.getPressure()); lcd.print(" Pa");
+//    lcd.setCursor(0, 1); lcd.print("relay OFF   ");
+    Serial.println(myBMP.getPressure());
+  } else if (myBMP.getPressure() > 120000) {
+    lcd.backlight();
+    lcd.setCursor(0, 0); lcd.print("P: ");lcd.print(myBMP.getPressure()); lcd.print(" Pa");
+    lcd.setCursor(0, 1); lcd.print("Relay ON  ");
+    Serial.println(myBMP.getPressure());
+    digitalWrite(relay, LOW);
   }
+
+
 }
